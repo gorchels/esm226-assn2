@@ -1,0 +1,65 @@
+---
+title: 'Assignment 2: Calculations'
+author: "Madeline Gorchels"
+date: "2/3/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+1. Loading in relevant data analysis packages
+
+```{r, output=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+2. Loading in my data
+
+```{r, output=FALSE, message=FALSE, warning=FALSE}
+w_y_cor = read_csv("CORVALLIS_WATER_BUREAU_W_Y.csv")
+
+#data modified in excell from: https://www.ncdc.noaa.gov/cdo-web/datasets/GHCND/stations/GHCND:USC00351877/detail
+```
+
+3. Calculating the average percipitation for Corvallis, OR since 1936
+
+```{r, output=FALSE, message=FALSE, warning=FALSE}
+mean_prec = mean(w_y_cor$w_y)
+```
+The average precipitation is 2097.7 mm. 
+
+4. Creating a line graph of cumulative departure
+
+```{r, message=FALSE, warning=FALSE}
+#First I need to calculate cumulative departure for my data set
+dept_df = w_y_cor %>% 
+  mutate(dept = w_y - mean_prec) 
+#This gives me anual departure
+
+#To get this into cumulative departure, I will use a for loop to create a vector with the correct answers and then bind that into the data frame.
+c_dept = 1737.632099
+  for (i in 1:80) {c_dept[i+1] = dept_df$dept[i+1]+c_dept[i]}
+c_dept_df = data.frame(c_dept)
+
+dept_c_df = dept_df %>% 
+  cbind(c_dept_df)
+
+#Now I have a data set that includes the cumnulative departure in the column called "c_dept"
+
+#Finally, I will make the line graph
+dept_plot = ggplot(dept_c_df, aes(x = yaer, y = c_dept))+
+  geom_line()+
+  theme_classic()+
+  geom_hline(yintercept = 0, linetype = "dashed")+
+  xlab("Water Year")+
+  ylab("Cumulative Departure (mm precipitation from mean)")+
+  xlim(1937, 2017)
+
+dept_plot
+```
+
+
+
